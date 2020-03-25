@@ -1,0 +1,39 @@
+{% extends "users/base.html" %}
+{% block content %}
+<h1>Videos</h1>
+<div class="d-flex flex-wrap">
+  {% for v in videos %}
+  <div class="p-2">
+    <div class="card" style="width: 18rem;">
+      <img class="card-img-top" src="{{v.thumbnail.url}}" style="width: auto; height: 130px; object-fit: cover;"/><br /> 
+      <div class="card-body">
+        Author: {{v.owner.username}} | {{v.created}}<br />
+        {{v.title}}
+        <a href="{% url 'video' v.id %}" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div>
+    Thumbnail: <input type="file" name="thumbnail"/>
+    {{form.thumbnail.errors}}
+  </div>
+  <div>
+    Video: <input type="file" name="video" />
+    {{form.video.errors}}
+  </div>
+  <div>
+    Title: <input type="text" name="title" />
+    {{form.title.errors}}
+  </div>
+  <div>
+    Description: <input type="text" name="description" />
+    {{form.description.errors}}
+  </div>
+  <input type="submit" />
+</form>
+{% endblock %}

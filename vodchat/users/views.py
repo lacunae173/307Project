@@ -7,11 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from . import forms
 
-#@login_required(login_url='/login')
+@login_required(login_url='/login')
 def index(request):
-  if not request.user.is_authenticated:
-    return HttpResponseRedirect(reverse('login'))
-  return HttpResponse('Hello ' + request.user.username)
+  # if not request.user.is_authenticated:
+  #   return HttpResponseRedirect(reverse('login'))
+  return HttpResponseRedirect(reverse('videos'))
 
 def signup(request):
     context = {}
@@ -40,7 +40,9 @@ def do_login(request):
               password=form.cleaned_data['password'])
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('index'))
+                if 'next' in request.GET:
+                    return HttpResponseRedirect(request.GET['next'])
+                return HttpResponseRedirect(reverse('videos'))
             else:
                 form.add_error(None, 'Unable to log in')
         context['form'] = form
