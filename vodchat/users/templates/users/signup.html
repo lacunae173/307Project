@@ -1,0 +1,39 @@
+{% extends 'users/base.html' %}
+{% block content %}
+<h1>Sign up</h1>
+<form method="post" action="">
+  {% csrf_token %}
+  <div class="form-row">
+    <div class="form-group">
+      <label for="signup-username">Username</label>
+      <input class="form-control" id="signup-username" type="text" name="username" value="{{form.data.username}}"/>
+      <p>{{ form.username.errors }}</p>
+    </div>
+  </div>  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="signup-email">Email</label>
+      <input class="form-control" id="signup-email" type="text" name="email" value="{{form.data.email}}" />
+      <p>{{ form.email.errors }}</p>
+    </div>
+  </div>  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="signup-password">Create password</label>
+      <input class="form-control" id="signup-password" type="password" name="password" />
+      <p>{{ form.password.errors }}</p>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="signup-confirm">Confirm password</label>
+      <input class="form-control" id="signup-confirm" type="password" name="password_confirm" />
+      <p>{{ form.password_confirm.errors }}</p>
+    </div>
+  </div>
+  <div class="form-row">
+    <button class="btn btn-primary" type="submit">Sign up</button>
+  </div>
+</form>
+{% endblock %}
+
