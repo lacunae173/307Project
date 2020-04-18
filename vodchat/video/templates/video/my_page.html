@@ -1,0 +1,111 @@
+{% extends "users/base.html" %}
+{% block content %}
+<h1>{{username}}'s Page</h1>
+<div class="d-flex">
+    <div class="col-2">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link active" id="v-pills-uploads-tab" data-toggle="pill" href="#v-pills-uploads" role="tab" aria-controls="v-pills-uploads" aria-selected="true">My uploads</a>
+            <a class="nav-link" id="v-pills-history-tab" data-toggle="pill" href="#v-pills-history" role="tab" aria-controls="v-pills-history" aria-selected="false">Watch history</a>
+            <a class="nav-link" id="v-pills-video-tab" data-toggle="pill" href="#v-pills-video" role="tab" aria-controls="v-pills-video" aria-selected="false">Upload a video</a>
+        </div>
+    </div>
+    <div class="col-10">
+        <div class="tab-content" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-uploads" role="tabpanel" aria-labelledby="v-pills-uploads-tab">
+                <div class="d-flex flex-column">
+                    {% for v in uploads %}
+                      <div class="card flex-row flex-wrap" id="card-{{v.id}}">
+                          <div class="card-header border-0">
+                            <img src="{{v.thumbnail.url}}" style="width: 130px; height: 130px; object-fit: cover;"/>
+                          </div>
+                          <div class="card-block px-2">
+                            <h4 class="card-title">{{v.title}}</h4>
+                            <p class="card-text">Author: {{v.owner.username}}</p>
+                            <p class="card-text">{{v.created}}</p>
+                          </div>
+                          <a href="{% url 'video' v.id %}" class="stretched-link"></a>
+                          <div class="ml-auto align-self-center" style="z-index: 2;">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-outline-danger btn-delete" id="delete-{{v.id}}" style="margin-right: 5px;";">Delete</button>
+                          </div>                       
+                          
+                      </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="v-pills-history" role="tabpanel" aria-labelledby="v-pills-history-tab">
+                {% for h in history %}
+                <div class="card flex-row flex-wrap">
+                  <div class="card-header border-0">
+                    <img src="{{h.video.thumbnail.url}}" style="width: 130px; height: 130px; object-fit: cover;"/>
+                  </div>
+                  <div class="card-block px-2">
+                    <h4 class="card-title">{{h.video.title}}</h4>
+                    <p class="card-text">Author: {{h.video.owner.username}}</p>
+                    <p class="card-text">{{h.time_watched}}</p>
+                  </div>                       
+                  <a href="{% url 'video' h.video.id %}" class="stretched-link"></a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="tab-pane fade" id="v-pills-video" role="tabpanel" aria-labelledby="v-pills-video-tab">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div>
+                      Thumbnail: <input type="file" name="thumbnail"/>
+                      {{form.thumbnail.errors}}
+                    </div>
+                    <div>
+                      Video: <input type="file" name="video" />
+                      {{form.video.errors}}
+                    </div>
+                    <div>
+                      Title: <input type="text" name="title" />
+                      {{form.title.errors}}
+                    </div>
+                    <div>
+                      Description: <input type="text" name="description" />
+                      {{form.description.errors}}
+                    </div>
+                    <input type="submit" />
+                  </form>
+            </div>
+            
+          </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+{% csrf_token %}
+<script>
+  $('.btn-delete').on('click', function() {
+    var video_pk = $(this).attr('id').split('-')[1];
+    console.log(video_pk);
+    delete_video(video_pk);
+  });
+
+  function delete_video(video_pk) {
+    if (confirm('Are you sure you want to remove this video?')) {
+      var csrftoken = $('[name="csrfmiddlewaretoken"]').val();
+      $.ajax({
+        url: '{% url "delete_upload" %}',
+        type: "POST",
+        dataType:'json',
+        data: {video_pk: video_pk, 'csrfmiddlewaretoken': csrftoken},
+        success: function(json) {
+          $('#card-'+video_pk).fadeOut("normal", function() {
+            $(this).remove();
+          });
+        },
+        error: function(xhr, errmsg, err) {
+          alert("There was an error.")
+        }
+      });
+    } else {
+      return false;
+    }
+  };
+</script>
+{% endblock %}
