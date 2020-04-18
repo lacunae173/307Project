@@ -15,4 +15,12 @@ class Video(models.Model):
     thumbnail = models.FileField(upload_to=get_thumbnail_upload_path)
     description = models.CharField(max_length=10000)
     created = models.DateTimeField(auto_now_add=True)
-    
+    class Meta:
+       ordering = ['-created']
+
+class History(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    time_watched = models.DateTimeField(auto_now_add=True) 
+    class Meta:
+       ordering = ['-time_watched']  
