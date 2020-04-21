@@ -15,6 +15,10 @@ class Video(models.Model):
     thumbnail = models.FileField(upload_to=get_thumbnail_upload_path)
     description = models.CharField(max_length=10000)
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.id}-{self.title}-by:{self.owner.id}'
+
     class Meta:
        ordering = ['-created']
 
@@ -22,5 +26,9 @@ class History(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     time_watched = models.DateTimeField(auto_now_add=True) 
+    
+    def __str__(self):
+      return f'uid:{self.user.id}-vid:{self.video.id}'
+
     class Meta:
        ordering = ['-time_watched']  
