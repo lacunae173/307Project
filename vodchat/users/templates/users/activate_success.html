@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Vodchat</title>
+    </head>
+    <body>
+        Account activated. Redirecting to log in...
+    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        setTimeout(function() {
+            $.get("{% url 'login' %}") 
+        }, 3000);
+    </script>
+</html>

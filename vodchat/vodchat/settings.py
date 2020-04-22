@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
-    'video'
+    'video',
+    'anymail'
 ]
 
 MIDDLEWARE = [
@@ -127,3 +128,12 @@ LOGIN_URL = '/login'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/staticfiles/media'
+
+ANYMAIL = {
+    # (exact settings here depend on your ESP...)
+    "MAILGUN_API_KEY": "eb1cbb226512ecf9315e5e0d0ad280f1-f135b0f1-c95f8d75",
+    "MAILGUN_SENDER_DOMAIN": 'sandboxbbf003c2585f4c99910b146e1994f18f.mailgun.org',  # your Mailgun domain, if needed
+}
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"  # or sendgrid.EmailBackend, or...
+DEFAULT_FROM_EMAIL = "lily.zhang@mail.mcgill.ca"  # if you don't already have this in settings
+SERVER_EMAIL = "lily.zhang@mail.mcgill.ca"  # ditto (default from-email for Django errors)
