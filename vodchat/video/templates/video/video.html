@@ -1,0 +1,86 @@
+{% extends "users/base.html" %}
+{% block content %}
+<h1>{{video.title}}</h1>
+<div id="commentArea">
+{%for c in video.comment_set.all%}
+<p style="display:none">{{c.text}}</p>
+<p style="display:none" class = "myTime">{{c.time}}</p></br>
+{%end for%}
+</div>
+<video id="myVideo" controls>
+    <source src="{{video.video.url}}" type="video/mp4">
+</video>
+<p>Description: {{video.description}}</p>
+
+
+Comment: <input type="text" id= 'chat-message-input' name="comment"/></br>
+<input id="chat-message-submit" type="button" value="Send"/>
+
+
+<script>
+var myVid=document.getElementById("myVideo");
+
+function update()
+{
+    var currenttime = myVid.played.end(0);
+    var times = document.getElementsByClassName("myTime");
+    var i;
+    for (i = 0; i < times.length; i++) {
+        var t=parseFloat(times[i].innerHTML)*1000;
+        if(t>=currentTime&&t<=currentTime+20000)
+        {
+            times[i].previousElementSibling.style.display = "block";
+        }
+        else
+        {
+            times[i].previousElementSibling.style.display = "none";
+        }
+    }
+}
+
+var video_id = "{{ video.id }}";
+
+var chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/video/' + video_id + '/');
+
+chatSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        var time = data['time'];
+        var para=document.createElement("p");
+        para.innerHTML=message;
+        para.style.display = "none";
+        var para2=document.createElement("p");
+        para2.innerHTML=time;
+        para2.style.display = "none";
+        para2.classList.add('myTime');
+        document.getElementById("commentArea").appendChild(para);
+        document.getElementById("commentArea").appendChild(para2);
+};
+
+chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+};
+
+document.getElementById('chat-message-input').focus();
+document.getElementById('chat-message-input').onkeyup = function(e) {
+if (e.keyCode === 13) {  // enter, return
+            document.getElementById('chat-message-submit').click();
+        }
+};
+
+document.getElementById('chat-message-submit').onclick = function(e) {
+        var messageInputDom = document.getElementById('chat-message-input');
+        var message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'time':myVid.played.end(0)
+        }));
+
+        messageInputDom.value = '';
+};
+    
+setInterval(update, 100);
+</script>
+{% endblock %}

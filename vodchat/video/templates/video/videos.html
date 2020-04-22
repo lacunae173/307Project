@@ -1,0 +1,19 @@
+{% extends "users/base.html" %}
+{% block content %}
+<h1>Videos</h1>
+<div class="d-flex flex-wrap">
+  {% for v in videos %}
+  <div class="p-2">
+    <div class="card" style="width: 18rem;">
+      <img class="card-img-top" src="{{v.thumbnail.url}}" style="width: auto; height: 130px; object-fit: cover;"/><br /> 
+      <div class="card-body">
+        Author: {{v.owner.username}} <br />
+        {{v.created}} <br />
+        {{v.title}}
+        <a href="{% url 'video' v.id %}" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
