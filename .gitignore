@@ -1,0 +1,6 @@
+307proj.code-workspace
+.vscode/launch.json
+.vscode/settings.json
+vodchat/db.sqlite3
+*.pyc
+migrations
