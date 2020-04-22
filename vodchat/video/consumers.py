@@ -3,6 +3,7 @@ from channels.generic.websocket import WebsocketConsumer
 import json
 from channels.auth import get_user, logout
 from django.contrib.auth.models import User
+from .models import Comment, Video
 
 class VideoConsumer(WebsocketConsumer):
     def connect(self):
@@ -43,7 +44,8 @@ class VideoConsumer(WebsocketConsumer):
         #     message = 'Anonymous: ' + message ##possible to be changed
         
         # Store message into database
-        Comment(video=self.video_id, text=message, time=time, vote=0).save()
+        video = Video.objects.get(pk=int(self.video_id))
+        Comment(video=video, text=message, time=time, vote=0).save()
 
         # Send message to video group
         async_to_sync(self.channel_layer.group_send)(

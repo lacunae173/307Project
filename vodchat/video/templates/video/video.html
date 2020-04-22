@@ -5,7 +5,7 @@
 {%for c in video.comment_set.all%}
 <p style="display:none">{{c.text}}</p>
 <p style="display:none" class = "myTime">{{c.time}}</p></br>
-{%end for%}
+{%endfor%}
 </div>
 <video id="myVideo" controls>
     <source src="{{video.video.url}}" type="video/mp4">
