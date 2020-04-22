@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from channels.layers import get_channel_layer
 from django.db import IntegrityError
 from . import forms
 

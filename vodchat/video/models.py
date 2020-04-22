@@ -40,3 +40,5 @@ class Comment(models.Model):
     vote = models.IntegerField() 
     def __str__(self):
         return f'cid:{self.id}-vid:{self.video.id}'
+    class Meta:
+       ordering = ['time']  
