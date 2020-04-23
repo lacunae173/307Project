@@ -1,20 +1,24 @@
 {% extends "users/base.html" %}
+{% load mathfilters %}
 {% block content %}
 <h1>{{video.title}}</h1>
-<div id="commentArea" class="overflow-auto" style="max-height: 100px;">
-{%for c in video.comment_set.all%}
-<div style="display:none">
-    <div class = "myTime">{{c.time}}</div>
-    {{c.text}}
-</div>
-<!-- <p style="display:none" class = "myTime">{{c.time}}</p></br> -->
-{%endfor%}
-</div>
+
 <video id="myVideo" controls>
     <source src="{{video.video.url}}" type="video/mp4">
 </video>
 <p>Description: {{video.description}}</p>
-
+<div id="commentArea" class="overflow-auto" style="max-height: 200px; padding: 10px;">
+    {%for c in video.comment_set.all%}
+    
+    <div style="display:none; border: darkgray;">
+    
+        <div class = "myTime">{{c.time}}</div>
+        <span id="comment-{{c.id}}" style="font-size: {{c.vote|mul:"3"|add:"20"}}px;">{{c.text}}</span>
+        <button class="btn-upvote btn btn-outline-warning" id="upvote-{{c.id}}" >up</button>
+    </div>
+    <!-- <p style="display:none" class = "myTime">{{c.time}}</p></br> -->
+    {%endfor%}
+</div>
 
 Comment: <input type="text" id= 'chat-message-input' name="comment"/></br>
 <input id="chat-message-submit" type="button" value="Send"/>
@@ -33,17 +37,21 @@ Comment: <input type="text" id= 'chat-message-input' name="comment"/></br>
         var i;
         for (i = 0; i < times.length; i++) {
             var t=parseFloat(times[i].innerHTML);
-            if(currentTime>=t&&currentTime<=t+10)
+            if(currentTime>=t && currentTime<=t+5)
             {
+                if (times[i].parentElement.style.display == "none") {
+                    var div = document.getElementById("commentArea");
+                    div.scrollTop = div.scrollHeight - div.clientHeight;
+                }
                 times[i].parentElement.style.display = "block";
+                
             }
             else
             {
                 times[i].parentElement.style.display = "none";
             }
         }
-        var div = document.getElementById("commentArea");
-        div.scrollTop = div.scrollHeight - div.clientHeight;
+        
     }
     
     var video_id = "{{ video.id }}";
@@ -52,27 +60,79 @@ Comment: <input type="text" id= 'chat-message-input' name="comment"/></br>
             'ws://' + window.location.host +
             '/ws/video/' + video_id + '/');
     
+    var voteSocket = new WebSocket('ws://' + window.location.host +
+            '/ws/video/vote/' + video_id + '/');
+
+    voteSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var comment_pk = data['comment_pk'];
+        var vote = data['vote'] * 3 + 20;
+        
+        $('#comment-'+comment_pk).css("fontSize", vote);
+        
+    }
+
+    voteSocket.onclose = function(e) {
+        console.error('vote socket closed unexpectedly');
+    }
+    function upvote_clicked (button) {
+        var comment_pk = event.target.id.split('-')[1];
+        var vote_span = $('#vote-'+comment_pk)
+        var vote = vote_span.innerHTML;
+        console.log(comment_pk);
+        voteSocket.send(JSON.stringify({
+            'comment_pk': comment_pk,
+            'vote': vote
+        }));
+    }
+
+    $('.btn-upvote').on('click', function() {
+        var comment_pk = $(this).attr('id').split('-')[1];
+        var vote_span = $('#vote-'+comment_pk)
+        var vote = vote_span.innerHTML;
+        console.log(comment_pk);
+        voteSocket.send(JSON.stringify({
+            'comment_pk': comment_pk,
+            'vote': vote
+        }));
+    });
+
     chatSocket.onmessage = function(e) {
+        //<button class="btn-upvote btn btn-outline-warning" id="upvote-{{c.id}}" >up</button>
             var data = JSON.parse(e.data);
             var message = data['message'];
             var time = data['time'];
             var commentDiv=document.createElement("div");
+            var commentSpan = document.createElement("span");
+            commentSpan.id = "comment-"+data['id'];
+
             var timeDiv=document.createElement("div");
-            timeDiv.innerHTML = time
-            var messageNode = document.createTextNode(message)
-            commentDiv.appendChild(timeDiv)
-            commentDiv.appendChild(messageNode)
+            timeDiv.innerHTML = time;
+            timeDiv.classList.add("myTime");
+
+            var messageNode = document.createTextNode(message);
+            commentDiv.appendChild(timeDiv);
+            commentSpan.appendChild(messageNode);
+            commentDiv.appendChild(commentSpan);
             commentDiv.style.display = "block";
+            var button = document.createElement("button");
+            button.classList.add("btn-upvote");
+            button.classList.add("btn");
+            button.classList.add("btn-outline-warning");
+            button.id = "upvote-"+data['id'];
+            button.innerHTML = "up";
+            button.onclick = upvote_clicked;
+            commentDiv.appendChild(button);
             var times = document.getElementsByClassName("myTime");
             var i;
             for (i = 0; i < times.length; i++) {
                 var t=parseFloat(times[i].innerHTML);
-                if (parseFloat(time) >= t) {
+                if (parseFloat(time) < t) {
                     break;
                 }
                 //document.getElementById("commentArea").appendChild(commentDiv);
             }
-            document.getElementById("commentArea").insertBefore(commentDiv, times[i].parentElement)
+            document.getElementById("commentArea").insertBefore(commentDiv, times[i+1].parentElement)
             
         };
     
@@ -91,6 +151,7 @@ Comment: <input type="text" id= 'chat-message-input' name="comment"/></br>
             var messageInputDom = document.getElementById('chat-message-input');
             var message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
+                'id': -1,
                 'message': message,
                 'time':myVid.currentTime
             }));

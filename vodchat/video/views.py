@@ -6,6 +6,8 @@ from users.views import index
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, QueryDict
 import json
+from django.urls import reverse
+from asgiref.sync import async_to_sync
 # Create your views here.
 
 

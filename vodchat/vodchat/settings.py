@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels', #~~~~~~~~
     'users', 
-    'video'
+    'video',
+    "mathfilters"
 ]
 
 MIDDLEWARE = [

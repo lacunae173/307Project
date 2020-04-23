@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from channels.layers import get_channel_layer
 from django.db import IntegrityError
 from . import forms
+from asgiref.sync import async_to_sync
 
 @login_required(login_url='/login')
 def index(request):
